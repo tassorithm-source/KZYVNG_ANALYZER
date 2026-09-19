@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KZYVNG — Panel de ascenso</title>
+<style>
+:root{--bg:#0d0f14;--panel:#161a22;--panel2:#1d222c;--line:#272e3b;--fg:#e8ecf4;
+--muted:#8a93a8;--acc:#4da3ff;--good:#3ecf8e;--warn:#ffc14d;--bad:#ff6b6b}
+:root:not([data-theme="light"]){color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;padding:26px 18px 70px;background:var(--bg);color:var(--fg);
+font:15px/1.55 ui-sans-serif,system-ui,'Segoe UI',sans-serif}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-size:27px;margin:0 0 3px;letter-spacing:-.3px}
+h2{font-size:16px;margin:36px 0 12px;color:var(--acc);text-transform:uppercase;
+letter-spacing:.8px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:20px}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px}
+.lbl{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px}
+.val{font-size:26px;font-weight:650;margin:5px 0 2px}
+.sub{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--panel);
+border:1px solid var(--line);border-radius:11px;overflow:hidden}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px}
+tr:last-child td{border-bottom:none}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.track{height:10px;background:var(--panel2);border-radius:6px;overflow:hidden;margin-top:7px}
+.fill{height:100%;border-radius:6px;background:var(--acc);transition:width .4s}
+.fill.ok{background:var(--good)}.fill.mid{background:var(--warn)}.fill.low{background:var(--bad)}
+.why{color:var(--muted);font-size:12.3px;margin-top:8px;line-height:1.45}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.now{font-size:21px;font-weight:650}
+.tgt{color:var(--muted);font-size:13px}
+input,select{background:var(--panel2);border:1px solid var(--line);color:var(--fg);
+border-radius:8px;padding:8px 10px;font-size:14px;width:100%;font-family:inherit}
+label{display:block;color:var(--muted);font-size:11.5px;text-transform:uppercase;
+letter-spacing:.5px;margin-bottom:5px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.big{font-size:34px;font-weight:700;letter-spacing:-.5px}
+.note{background:var(--panel);border-left:3px solid var(--acc);padding:12px 15px;
+border-radius:0 9px 9px 0;color:var(--muted);font-size:13.3px;margin-top:13px}
+.note b{color:var(--fg)}
+svg.chart{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px}
+.grd{stroke:var(--line);stroke-width:1}.axs{fill:var(--muted);font-size:10px}
+.l1{fill:none;stroke:var(--acc);stroke-width:2.2}
+.l2{fill:none;stroke:var(--good);stroke-width:2;stroke-dasharray:5 4}
+.bars rect{fill:var(--acc)}.bars rect.hot{fill:var(--bad)}
+ol.plan{padding-left:20px;margin:0}
+ol.plan li{margin-bottom:11px}
+ol.plan b{color:var(--acc)}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11.5px;
+background:var(--panel2);color:var(--muted);margin-left:6px}
+@media(max-width:560px){.val{font-size:22px}.big{font-size:27px}}
+</style></head><body><div class="wrap">
+<h1>Panel de ascenso — Kzyvng#9991</h1>
+<div class="meta" id="hdr"></div>
+
+<h2>0 · Tu rango ahora (league-v4)</h2>
+<div id="rankbox"></div>
+
+<h2>1 · Tu trayectoria real hacia el nº1 de Nautilus</h2>
+<div class="note">League of Graphs rankea con la fórmula de mérito: <b>+1 tier multiplica tu
+score ×4</b>; +12 puntos de winrate sobre la media del campeón, ×2; duplicar tu KDA, ×1.33.
+Subir de tier vale más que cualquier racha de winrate — por eso esto ya no es una calculadora
+para que juegues con hipótesis: es tu propio score, recalculado con tus partidas reales de
+Nautilus y tu tier actual, mostrado como <b>tendencia</b> para que veas si te acercas o te alejas.</div>
+
+<div class="card" style="margin-top:14px">
+  <div class="grid g4">
+    <div><div class="lbl">Tu score de mérito hoy</div><div class="big" id="mscore">—</div>
+      <div class="sub" id="mtier"></div></div>
+    <div><div class="lbl">Tendencia (últimas ~25 vs hace un tramo)</div>
+      <div class="big" id="mtrend">—</div>
+      <div class="sub">positivo = te acercas al nº1, negativo = te alejas</div></div>
+    <div><div class="lbl">Para duplicar tu score sin subir de tier</div>
+      <div class="val" id="mwr">—</div>
+      <div class="sub" id="mkda"></div></div>
+  </div>
+  <div style="margin-top:14px" id="mchart"></div>
+  <div class="why" id="mverdict"></div>
+</div>
+
+<h2>2 · Dónde estás hoy</h2>
+<div class="grid g4" id="kpis"></div>
+
+<h2>3 · Lo que no ves mirando partida por partida</h2>
+<div class="sub" style="margin-bottom:10px">Patrones que solo aparecen al cruzar tus 280 partidas
+entre sí — lado de mapa, horario, matchups y quién te elimina de verdad.</div>
+<div id="coach"></div>
+
+<h2>4 · El reloj de tus muertes</h2>
+<div id="reloj"></div>
+<div class="grid g2" style="margin-top:12px" id="fases"></div>
+
+<h2>5 · Presencia en objetivos</h2>
+<table><tr><th>Objetivo</th><th>Tomados por tu equipo</th><th>Estabas presente</th><th></th></tr>
+<tbody id="objs"></tbody></table>
+
+<h2>6 · Evolución y tus últimas partidas</h2>
+<div id="trend"></div>
+<div class="sub" style="margin-top:8px">— Winrate móvil (20 partidas) &nbsp;&nbsp; ---- Performance index &nbsp;&nbsp; · todo tu historial</div>
+<table style="margin-top:14px"><tr><th>Métrica</th><th>Histórico</th><th>Últimas 30</th><th>Dirección</th></tr>
+<tbody id="comp"></tbody></table>
+
+<div class="sub" style="margin:18px 0 10px">Últimas 12 partidas, estilo resumen rápido — tu score
+(sobre 10, calculado con tu propio percentil de rendimiento), KDA y visión, lado a lado con tu
+support rival de esa partida.</div>
+<div style="overflow-x:auto"><table>
+<tr><th>Fecha</th><th>Campeón</th><th>Res.</th><th>KDA</th><th>Visión</th><th>Score</th><th>Rival</th></tr>
+<tbody id="recent"></tbody></table></div>
+
+<h2>7 · Tu manual de juego (basado en evidencia, no en opinión)</h2>
+<div class="note">¿Hacer siempre lo mismo garantiza ganar? No — el League of Legends
+depende de otras 9 personas que no controlas, así que ninguna métrica tuya puede ser
+determinista. Lo que sí existe es <b>probabilidad condicional</b>: dado que cumples X,
+¿qué tan seguido ganas? Cada regla de abajo pasó un filtro de Wilson al 95%: si el
+intervalo de confianza de su winrate no supera claramente tu base (<b id="bwr2"></b>),
+no aparece aquí — es ruido, no señal. Cuantas más partidas juegues, más se ajustan
+estos números solos, sin que yo vuelva a tocar el código.</div>
+
+<h3 style="margin:20px 0 10px;font-size:14.5px;color:var(--fg)">Palancas individuales con señal real</h3>
+<div id="reglas_simples"></div>
+
+<h3 style="margin:22px 0 10px;font-size:14.5px;color:var(--fg)">Combinaciones (cuando dos palancas juntas suman más que por separado)</h3>
+<div id="reglas_combo"></div>
+
+<h3 style="margin:22px 0 10px;font-size:14.5px;color:var(--fg)">Ya lo estás haciendo bien</h3>
+<div class="sub" style="margin-bottom:10px">Tu promedio actual ya cae del lado ganador en estas métricas. Mantenlas, no las toques.</div>
+<div id="fortalezas"></div>
+
+<div class="note" id="sin_senal_box" style="margin-top:16px"></div>
+
+<div class="note" style="margin-top:22px">Aviso honesto sobre estos números: parte de la
+correlación entre muertes y derrotas es inversa — pierdes y por eso mueres, no solo al revés.
+La métrica menos contaminada de la lista es el oro de tu bot lane en el minuto 15, porque se
+mide antes de que la partida se decida. Trátala como tu indicador principal.</div>
+</div>
+<script>
+const D = {"games": 289, "wr": 48.4, "naut_games": 239, "naut_wr": 51.0, "naut_kda": 2.59, "first": "2026-06-08", "last": "2026-09-18", "base_wr": 48.4, "reglas_simples": [{"key": "deaths", "label": "Muertes por partida", "agencia": "controlable", "cond_txt": "Muertes por partida ≤ 5.0", "n": 121, "wr": 65.3, "lo": 56.5, "hi": 73.2, "lift": 16.9, "why": "Depende solo de ti."}, {"key": "botlane_gold_diff_15", "label": "Oro de tu bot lane @15", "agencia": "lider", "cond_txt": "Oro de tu bot lane @15 ≥ +844", "n": 95, "wr": 64.2, "lo": 54.2, "hi": 73.1, "lift": 15.8, "why": "Se mide antes de que la partida se decida: es tu mejor termómetro."}, {"key": "free_death_pct", "label": "% de muertes gratis", "agencia": "controlable", "cond_txt": "% de muertes gratis ≤ 40%", "n": 97, "wr": 62.9, "lo": 53.0, "hi": 71.8, "lift": 14.5, "why": "Depende solo de ti."}, {"key": "epic_presence_pct", "label": "Presencia en épicos", "agencia": "controlable", "cond_txt": "Presencia en épicos ≥ 33%", "n": 150, "wr": 59.3, "lo": 51.3, "hi": 66.9, "lift": 10.9, "why": "Depende solo de ti."}, {"key": "roam_conversion_pct", "label": "Roams convertidos", "agencia": "controlable", "cond_txt": "Roams convertidos ≥ 25%", "n": 150, "wr": 58.7, "lo": 50.7, "hi": 66.2, "lift": 10.3, "why": "Depende solo de ti."}], "reglas_combo": [{"label": "Muertes por partida ≤ 5.0  Y  Oro de tu bot lane @15 ≥ +844", "cond_txt": "Muertes por partida ≤ 5.0  Y  Oro de tu bot lane @15 ≥ +844", "n": 98, "wr": 73.5, "lo": 64.0, "hi": 81.2, "lift": 25.1}, {"label": "Muertes por partida ≤ 5.0  Y  Roams convertidos ≥ 25%", "cond_txt": "Muertes por partida ≤ 5.0  Y  Roams convertidos ≥ 25%", "n": 88, "wr": 73.9, "lo": 63.8, "hi": 81.9, "lift": 25.5}, {"label": "Muertes por partida ≤ 5.0  Y  % de muertes gratis ≤ 40%", "cond_txt": "Muertes por partida ≤ 5.0  Y  % de muertes gratis ≤ 40%", "n": 85, "wr": 71.8, "lo": 61.4, "hi": 80.2, "lift": 23.4}], "fortalezas": [{"key": "epic_presence_pct", "label": "Presencia en épicos", "agencia": "controlable", "cond_txt": "Presencia en épicos ≥ 33%", "n": 150, "wr": 59.3, "lo": 51.3, "hi": 66.9, "lift": 10.9, "why": "Depende solo de ti."}, {"key": "roam_conversion_pct", "label": "Roams convertidos", "agencia": "controlable", "cond_txt": "Roams convertidos ≥ 25%", "n": 150, "wr": 58.7, "lo": 50.7, "hi": 66.2, "lift": 10.3, "why": "Depende solo de ti."}], "sin_senal": ["Muertes en solitario", "Muertes antes del min 14", "CC aplicado por minuto", "Wards colocadas/min", "Control wards/min", "Wards enemigas limpiadas/min", "Kill participation"], "coach_insights": [{"tag": "Quién te elimina", "fuerza": "media", "texto": "Los campeones que más veces te matan en 1831 muertes registradas: Caitlyn (93, 5%), Jhin (79, 4%), Twitch (62, 3%). Si repites contra el mismo campeón, es un patrón de posicionamiento o de trade, no mala suerte — revisa el rango/gap-closer de esos tres."}, {"tag": "Matchup más difícil", "fuerza": "baja", "texto": "Contra Senna de soporte rival tu winrate cae a 0% en 8 partidas (tu base es 48.4%). Contra Blitzcrank en cambio subes a 78% en 9. Si ves a Senna en el select enemigo, ese es tu partido para jugar más conservador en fase de línea."}], "merito": {"score_hoy": 65.803, "score_hace_20": 66.219, "tendencia_pct": -0.6, "serie": [0.014, 0.064, 0.348, 1.238, 3.934, 15.225, 76.303, 71.216, 60.639, 63.37, 65.738, 62.902, 70.573, 67.688, 69.548, 75.73, 68.267, 66.1, 67.813, 65.874, 70.622, 68.573, 66.784, 71.035, 75.676, 76.712, 77.687, 75.668, 73.794, 74.653, 72.82, 71.355, 75.067, 76.192, 74.404, 68.688, 67.542, 66.304, 65.233, 66.219, 61.727, 62.554, 61.781, 64.302], "tier_hoy": "GOLD", "wr_hoy": 51.0, "kda_hoy": 2.59, "wr_para_duplicar": 12, "kda_para_duplicar": 2.61, "juegos": 239}, "reloj": [{"min": 0, "n": 156}, {"min": 5, "n": 238}, {"min": 10, "n": 319}, {"min": 15, "n": 324}, {"min": 20, "n": 308}, {"min": 25, "n": 257}, {"min": 30, "n": 146}, {"min": 35, "n": 66}, {"min": 40, "n": 19}], "fases": [{"phase": "early", "n": 631, "free": 54.0}, {"phase": "mid", "n": 714, "free": 50.6}, {"phase": "late", "n": 490, "free": 43.9}], "objetivos": [{"type": "DRAGON", "n": 647, "pres": 51.9}, {"type": "HORDE", "n": 460, "pres": 9.6}, {"type": "RIFTHERALD", "n": 146, "pres": 26.7}, {"type": "BARON_NASHOR", "n": 140, "pres": 50.0}], "serie_wr": [100.0, 100.0, 100.0, 75.0, 80.0, 66.7, 71.4, 62.5, 66.7, 70.0, 72.7, 66.7, 69.2, 71.4, 66.7, 62.5, 58.8, 55.6, 57.9, 60.0, 60.0, 55.0, 50.0, 50.0, 45.0, 50.0, 45.0, 45.0, 45.0, 45.0, 40.0, 40.0, 40.0, 35.0, 40.0, 45.0, 50.0, 50.0, 45.0, 40.0, 40.0, 45.0, 50.0, 55.0, 55.0, 50.0, 50.0, 50.0, 45.0, 40.0, 40.0, 45.0, 45.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 55.0, 50.0, 45.0, 45.0, 45.0, 45.0, 45.0, 45.0, 45.0, 45.0, 45.0, 45.0, 45.0, 45.0, 40.0, 35.0, 35.0, 35.0, 35.0, 40.0, 40.0, 40.0, 40.0, 35.0, 30.0, 35.0, 35.0, 40.0, 45.0, 45.0, 50.0, 55.0, 50.0, 50.0, 50.0, 55.0, 50.0, 45.0, 45.0, 45.0, 45.0, 50.0, 55.0, 55.0, 55.0, 55.0, 55.0, 55.0, 50.0, 50.0, 45.0, 45.0, 45.0, 45.0, 45.0, 40.0, 40.0, 45.0, 45.0, 40.0, 35.0, 35.0, 35.0, 35.0, 35.0, 35.0, 40.0, 35.0, 35.0, 40.0, 40.0, 40.0, 45.0, 45.0, 50.0, 50.0, 55.0, 50.0, 50.0, 55.0, 60.0, 60.0, 55.0, 60.0, 65.0, 60.0, 60.0, 65.0, 65.0, 60.0, 65.0, 65.0, 60.0, 55.0, 50.0, 55.0, 55.0, 55.0, 60.0, 60.0, 60.0, 60.0, 65.0, 65.0, 65.0, 70.0, 65.0, 65.0, 70.0, 70.0, 65.0, 65.0, 65.0, 65.0, 70.0, 70.0, 65.0, 65.0, 65.0, 65.0, 65.0, 65.0, 60.0, 55.0, 55.0, 50.0, 55.0, 50.0, 50.0, 50.0, 50.0, 45.0, 50.0, 55.0, 50.0, 50.0, 50.0, 55.0, 50.0, 45.0, 45.0, 40.0, 45.0, 45.0, 45.0, 50.0, 45.0, 45.0, 45.0, 50.0, 55.0, 60.0, 55.0, 55.0, 60.0, 55.0, 60.0, 60.0, 60.0, 65.0, 65.0, 65.0, 60.0, 60.0, 55.0, 50.0, 50.0, 50.0, 45.0, 40.0, 35.0, 35.0, 35.0, 30.0, 30.0, 30.0, 30.0, 25.0, 25.0, 25.0, 20.0, 25.0, 25.0, 25.0, 30.0, 30.0, 30.0, 30.0, 35.0, 35.0, 35.0, 30.0, 30.0, 35.0, 35.0, 40.0, 35.0, 35.0, 35.0, 30.0, 30.0, 25.0, 30.0, 35.0, 35.0, 35.0, 35.0, 40.0, 35.0, 35.0, 35.0, 35.0, 40.0, 40.0, 35.0, 35.0, 35.0, 40.0, 45.0, 45.0, 45.0, 50.0, 45.0, 45.0, 45.0, 50.0, 55.0, 50.0, 55.0, 60.0], "serie_idx": [47.3, 48.3, 50.7, 46.7, 45.0, 49.0, 49.6, 48.1, 47.0, 47.5, 47.3, 45.9, 47.8, 47.3, 45.7, 45.4, 45.7, 46.2, 45.3, 45.3, 46.3, 47.0, 45.7, 46.5, 47.4, 46.1, 46.1, 47.1, 47.4, 47.6, 47.4, 47.0, 46.4, 47.4, 49.8, 50.9, 52.1, 52.7, 52.6, 54.0, 53.1, 53.1, 53.9, 53.9, 53.1, 53.2, 52.2, 52.1, 51.9, 51.6, 51.2, 52.1, 51.6, 51.4, 50.0, 50.4, 49.8, 48.1, 49.8, 48.9, 49.2, 47.5, 47.1, 47.3, 47.5, 48.6, 49.5, 49.3, 49.6, 48.6, 49.7, 50.5, 50.2, 49.4, 50.3, 49.9, 49.3, 50.6, 49.8, 50.1, 50.1, 50.6, 50.4, 49.7, 49.8, 48.4, 49.3, 49.3, 48.8, 51.0, 51.7, 49.7, 51.2, 51.2, 50.2, 49.0, 47.9, 48.6, 48.3, 48.7, 48.3, 50.1, 50.9, 50.4, 50.8, 50.9, 47.8, 47.3, 47.1, 45.1, 43.9, 44.3, 42.7, 42.4, 41.9, 40.8, 41.6, 40.0, 39.0, 37.7, 37.7, 35.9, 36.1, 37.6, 35.9, 36.7, 39.1, 39.0, 41.2, 42.4, 42.4, 44.1, 46.3, 46.7, 47.7, 49.8, 49.4, 49.5, 50.8, 51.1, 51.3, 51.5, 50.9, 51.0, 53.0, 52.5, 52.4, 51.3, 49.7, 49.7, 49.9, 48.9, 46.9, 46.1, 46.7, 45.9, 46.4, 47.7, 48.2, 48.9, 48.4, 49.3, 50.7, 49.7, 49.0, 49.7, 50.2, 51.1, 51.3, 50.4, 49.5, 49.5, 49.7, 52.6, 52.1, 52.0, 52.4, 50.2, 48.9, 48.8, 49.4, 48.1, 47.3, 48.5, 48.0, 47.4, 46.8, 48.3, 48.8, 48.9, 50.4, 51.1, 52.3, 50.9, 52.3, 53.2, 53.8, 55.5, 56.8, 57.1, 57.1, 58.3, 57.6, 57.5, 59.2, 58.6, 59.4, 59.5, 59.8, 60.0, 61.0, 60.4, 60.4, 60.7, 59.8, 60.2, 60.3, 60.3, 59.6, 57.6, 56.8, 56.0, 57.5, 56.8, 56.5, 58.5, 59.0, 58.7, 58.7, 59.0, 57.7, 58.5, 56.7, 56.0, 55.4, 55.1, 53.8, 53.7, 54.9, 54.1, 54.6, 54.5, 52.5, 51.9, 50.8, 48.9, 48.0, 48.7, 47.1, 46.8, 46.9, 46.0, 48.1, 48.3, 49.6, 49.4, 49.6, 48.7, 48.6, 50.0, 49.5, 50.7, 50.6, 50.7, 50.7, 50.7, 50.6, 47.3, 46.9, 47.5, 46.0, 46.5, 44.5, 45.2, 44.5, 44.6, 44.3, 45.9, 44.9, 45.8, 47.5, 47.5, 48.9, 49.4, 49.4, 50.1, 47.7, 50.4, 52.0], "fechas": ["2026-06-08", "2026-06-08", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-10", "2026-06-11", "2026-06-11", "2026-06-12", "2026-06-12", "2026-06-13", "2026-06-13", "2026-06-15", "2026-06-15", "2026-06-15", "2026-06-15", "2026-06-15", "2026-06-15", "2026-06-16", "2026-06-16", "2026-06-16", "2026-06-16", "2026-06-16", "2026-06-16", "2026-06-17", "2026-06-17", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-19", "2026-06-19", "2026-06-22", "2026-06-23", "2026-06-23", "2026-06-23", "2026-06-23", "2026-06-24", "2026-06-24", "2026-06-24", "2026-06-25", "2026-06-25", "2026-06-25", "2026-06-25", "2026-06-25", "2026-06-25", "2026-06-25", "2026-06-26", "2026-06-26", "2026-06-26", "2026-06-27", "2026-06-27", "2026-06-27", "2026-06-27", "2026-06-27", "2026-06-30", "2026-06-30", "2026-06-30", "2026-06-30", "2026-07-01", "2026-07-01", "2026-07-03", "2026-07-03", "2026-07-04", "2026-07-04", "2026-07-04", "2026-07-04", "2026-07-04", "2026-07-06", "2026-07-06", "2026-07-06", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-08", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-09", "2026-07-10", "2026-07-10", "2026-07-10", "2026-07-10", "2026-07-10", "2026-07-10", "2026-07-10", "2026-07-11", "2026-07-11", "2026-07-12", "2026-07-12", "2026-07-12", "2026-07-25", "2026-07-25", "2026-07-31", "2026-07-31", "2026-07-31", "2026-07-31", "2026-07-31", "2026-07-31", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-01", "2026-08-03", "2026-08-03", "2026-08-03", "2026-08-03", "2026-08-04", "2026-08-04", "2026-08-04", "2026-08-04", "2026-08-04", "2026-08-05", "2026-08-05", "2026-08-05", "2026-08-05", "2026-08-05", "2026-08-06", "2026-08-06", "2026-08-06", "2026-08-06", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-07", "2026-08-10", "2026-08-10", "2026-08-11", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-13", "2026-08-13", "2026-08-13", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-15", "2026-08-19", "2026-08-19", "2026-08-19", "2026-08-20", "2026-08-20", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-21", "2026-08-22", "2026-08-22", "2026-08-22", "2026-08-22", "2026-08-23", "2026-08-23", "2026-08-23", "2026-08-23", "2026-08-24", "2026-08-24", "2026-08-24", "2026-08-24", "2026-08-24", "2026-08-24", "2026-08-24", "2026-08-24", "2026-08-25", "2026-08-25", "2026-08-25", "2026-08-25", "2026-08-25", "2026-08-25", "2026-08-25", "2026-08-26", "2026-08-26", "2026-08-26", "2026-08-26", "2026-08-26", "2026-08-26", "2026-08-26", "2026-08-26", "2026-08-27", "2026-08-27", "2026-08-27", "2026-08-27", "2026-08-27", "2026-08-27", "2026-08-27", "2026-08-27", "2026-08-28", "2026-08-31", "2026-08-31", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-01", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-02", "2026-09-03", "2026-09-03", "2026-09-03", "2026-09-03", "2026-09-03", "2026-09-03", "2026-09-04", "2026-09-04", "2026-09-04", "2026-09-05", "2026-09-07", "2026-09-07", "2026-09-08", "2026-09-08", "2026-09-08", "2026-09-08", "2026-09-09", "2026-09-09", "2026-09-11", "2026-09-11", "2026-09-11", "2026-09-12", "2026-09-12", "2026-09-13", "2026-09-13", "2026-09-13", "2026-09-13", "2026-09-13", "2026-09-14", "2026-09-14", "2026-09-14", "2026-09-14", "2026-09-14", "2026-09-15", "2026-09-16", "2026-09-16", "2026-09-16", "2026-09-17", "2026-09-17", "2026-09-17", "2026-09-17", "2026-09-18", "2026-09-18"], "comparativa": [{"label": "Muertes", "hist": "6.35", "last": "4.73", "better": true}, {"label": "% gratis", "hist": "50%", "last": "58%", "better": false}, {"label": "Presencia epicos", "hist": "35%", "last": "40%", "better": true}, {"label": "CC/min", "hist": "8.38", "last": "7.00", "better": false}, {"label": "Oro bot @15", "hist": "-39", "last": "+77", "better": true}, {"label": "KP", "hist": "51%", "last": "49%", "better": false}], "recent_games": [{"date": "2026-09-18", "champion": "Nautilus", "win": 1, "kda": "2/3/21", "score10": 5.3, "mvp": false, "vision": 80, "riv_champion": "Lux", "riv_kda": "1/13/4", "riv_vision": 74, "vision_better": true}, {"date": "2026-09-18", "champion": "Nautilus", "win": 1, "kda": "4/3/26", "score10": 6.3, "mvp": false, "vision": 82, "riv_champion": "Morgana", "riv_kda": "0/7/6", "riv_vision": 55, "vision_better": true}, {"date": "2026-09-17", "champion": "Nautilus", "win": 0, "kda": "0/4/1", "score10": 1.0, "mvp": false, "vision": 20, "riv_champion": "Swain", "riv_kda": "4/1/8", "riv_vision": 15, "vision_better": true}, {"date": "2026-09-17", "champion": "Nautilus", "win": 1, "kda": "3/5/14", "score10": 5.1, "mvp": false, "vision": 61, "riv_champion": "Pyke", "riv_kda": "3/10/6", "riv_vision": 61, "vision_better": false}, {"date": "2026-09-17", "champion": "Nautilus", "win": 1, "kda": "1/5/21", "score10": 4.5, "mvp": false, "vision": 90, "riv_champion": "Blitzcrank", "riv_kda": "4/10/9", "riv_vision": 53, "vision_better": true}, {"date": "2026-09-17", "champion": "Nautilus", "win": 1, "kda": "4/3/13", "score10": 5.2, "mvp": false, "vision": 79, "riv_champion": "Leona", "riv_kda": "1/4/3", "riv_vision": 87, "vision_better": false}, {"date": "2026-09-16", "champion": "Nautilus", "win": 1, "kda": "3/5/19", "score10": 5.4, "mvp": false, "vision": 63, "riv_champion": "TahmKench", "riv_kda": "3/9/2", "riv_vision": 75, "vision_better": false}, {"date": "2026-09-16", "champion": "Nautilus", "win": 0, "kda": "0/6/19", "score10": 6.6, "mvp": false, "vision": 94, "riv_champion": "Hwei", "riv_kda": "2/8/14", "riv_vision": 99, "vision_better": false}, {"date": "2026-09-16", "champion": "Nautilus", "win": 1, "kda": "0/5/23", "score10": 7.3, "mvp": false, "vision": 102, "riv_champion": "Thresh", "riv_kda": "0/9/9", "riv_vision": 91, "vision_better": true}, {"date": "2026-09-15", "champion": "Nautilus", "win": 0, "kda": "0/8/15", "score10": 5.5, "mvp": false, "vision": 101, "riv_champion": "Poppy", "riv_kda": "1/9/9", "riv_vision": 111, "vision_better": false}, {"date": "2026-09-14", "champion": "Nautilus", "win": 0, "kda": "2/6/14", "score10": 4.4, "mvp": false, "vision": 63, "riv_champion": "TahmKench", "riv_kda": "4/7/9", "riv_vision": 43, "vision_better": true}, {"date": "2026-09-14", "champion": "Nautilus", "win": 1, "kda": "2/4/15", "score10": 7.0, "mvp": false, "vision": 67, "riv_champion": "Pyke", "riv_kda": "6/11/2", "riv_vision": 91, "vision_better": false}], "roams_total": 1062, "roams_conv": 27.7, "rank": {"RANKED_SOLO_5x5": {"queue": "RANKED_SOLO_5x5", "tier": "GOLD", "tier_es": "Oro", "division": "IV", "lp": 92, "wins": 46, "losses": 59, "wr": 43.8, "hot_streak": false, "fresh_blood": false, "veteran": false, "inactive": false, "lp_next": 308, "exact_rank": null, "league_size": null, "lp_to_first": null, "tier_index": 3}, "RANKED_PREMADE_5x5": {"queue": "RANKED_PREMADE_5x5", "tier": "SILVER", "tier_es": "Plata", "division": "II", "lp": 67, "wins": 4, "losses": 4, "wr": 50.0, "hot_streak": false, "fresh_blood": false, "veteran": false, "inactive": false, "lp_next": 133, "exact_rank": null, "league_size": null, "lp_to_first": null, "tier_index": 2}, "RANKED_FLEX_SR": {"queue": "RANKED_FLEX_SR", "tier": "GOLD", "tier_es": "Oro", "division": "III", "lp": 96, "wins": 163, "losses": 166, "wr": 49.5, "hot_streak": false, "fresh_blood": false, "veteran": false, "inactive": false, "lp_next": 204, "exact_rank": null, "league_size": null, "lp_to_first": null, "tier_index": 3}}, "generated_at": 1789830896};
+const TIERS = ["Hierro","Bronce","Plata","Oro","Platino","Esmeralda","Diamante","Maestro","Gran Maestro","Retador"];
+const $ = id => document.getElementById(id);
+
+// --- cabecera
+$("hdr").textContent = `${D.games} partidas competitivas · ${D.first} → ${D.last} · Nautilus: ${D.naut_games} partidas, ${D.naut_wr}% WR`;
+
+// --- rango real (league-v4)
+(function(){
+  if(!D.rank){
+    $("rankbox").innerHTML = `<div class="note">Todavía no hay un <code>rank_snapshot.json</code>.
+      Corre <b>python get_rank.py</b> en tu carpeta del proyecto (usa tu misma RIOT_API_KEY del .env)
+      y vuelve a generar este panel — esta sección se rellena sola.</div>`;
+    return;
+  }
+  const nombres = {RANKED_SOLO_5x5:"Solo/Dúo", RANKED_FLEX_SR:"Flex 5v5"};
+  let html = '<div class="grid g2">';
+  Object.values(D.rank).forEach(q=>{
+    const div = q.division ? " "+q.division : "";
+    let barra = "";
+    if(q.lp_next!==null && q.lp_next!==undefined){
+      const pctTier = 100 - Math.min(100, (q.lp_next/400)*100);
+      barra = `<div class="track"><div class="fill mid" style="width:${pctTier.toFixed(0)}%"></div></div>
+        <div class="why">${q.lp_next} LP hasta subir de tier (asumiendo 100 LP por división).</div>`;
+    } else if(q.exact_rank){
+      barra = `<div class="why">Puesto <b>#${q.exact_rank}</b> de ${q.league_size} en ${q.tier_es} de tu servidor.
+        Te separan <b>${q.lp_to_first} LP</b> del #1.</div>`;
+    }
+    const streak = q.hot_streak ? '<span class="pill good">🔥 racha activa</span>' : '';
+    html += `<div class="card">
+      <div class="row"><b>${nombres[q.queue]||q.queue}</b>${streak}</div>
+      <div class="big">${q.tier_es}${div}</div>
+      <div class="row"><div class="now">${q.lp} LP</div>
+        <div class="tgt">${q.wins}W ${q.losses}L · ${q.wr}% WR</div></div>
+      ${barra}</div>`;
+  });
+  html += '</div>';
+  $("rankbox").innerHTML = html;
+})();
+
+// --- KPIs
+const kpi = (l,v,s) => `<div class="card"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`;
+$("kpis").innerHTML =
+  kpi("Winrate global", D.wr+"%", D.games+" partidas") +
+  kpi("Winrate Nautilus", D.naut_wr+"%", D.naut_games+" partidas") +
+  kpi("KDA Nautilus", D.naut_kda, "kills+asistencias / muertes") +
+  kpi("Roams convertidos", D.roams_conv+"%", D.roams_total+" roams detectados");
+
+// --- coach insights (lo que no ves partida por partida)
+if(D.coach_insights && D.coach_insights.length){
+  $("coach").innerHTML = D.coach_insights.map(c=>{
+    const badgeCls = c.fuerza==="alta"?"good":(c.fuerza==="media"?"warn":"");
+    return `<div class="card" style="margin-bottom:10px">
+      <div class="row"><b>${c.tag}</b><span class="pill ${badgeCls}">señal ${c.fuerza}</span></div>
+      <div class="why" style="margin-top:6px;font-size:13.8px">${c.texto}</div>
+    </div>`;
+  }).join("");
+} else {
+  $("coach").innerHTML = `<div class="note">Todavía no hay suficiente volumen para aislar
+    patrones de lado de mapa, horario o matchups con confianza. Esta sección se llena sola
+    a medida que subas más partidas.</div>`;
+}
+
+// --- leyes
+// --- reloj de muertes
+(function(){
+  const d=D.reloj, W=920,H=210,pad=44;
+  const max=Math.max(...d.map(x=>x.n));
+  const bw=(W-pad-20)/d.length;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="chart"><g class="bars">`;
+  d.forEach((x,i)=>{
+    const h=(x.n/max)*(H-52);
+    const hot = x.min>=10 && x.min<25;
+    s+=`<rect class="${hot?'hot':''}" x="${pad+i*bw+3}" y="${H-32-h}" width="${bw-6}" height="${h}" rx="3"/>`;
+    s+=`<text class="axs" x="${pad+i*bw+bw/2}" y="${H-16}" text-anchor="middle">${x.min}</text>`;
+    s+=`<text class="axs" x="${pad+i*bw+bw/2}" y="${H-38-h}" text-anchor="middle">${x.n}</text>`;
+  });
+  s+=`</g><text class="axs" x="8" y="20">muertes por franja de 5 min</text></svg>`;
+  $("reloj").innerHTML=s;
+})();
+
+$("fases").innerHTML = D.fases.map(f=>{
+  const nombre = {early:"Antes del min 14",mid:"Min 14 a 25",late:"Después del min 25"}[f.phase];
+  return `<div class="card"><div class="lbl">${nombre}</div>
+    <div class="val">${f.n} <span class="sub">muertes</span></div>
+    <div class="row"><div class="sub">de las cuales gratis</div>
+    <div class="${f.free>50?'bad':'warn'}"><b>${f.free}%</b></div></div>
+    <div class="track"><div class="fill ${f.free>50?'low':'mid'}" style="width:${f.free}%"></div></div></div>`;
+}).join("");
+
+// --- objetivos
+$("objs").innerHTML = D.objetivos.map(o=>{
+  const nombres={HORDE:"Grubs / Horda del Vacío",DRAGON:"Dragón",RIFTHERALD:"Heraldo",BARON_NASHOR:"Barón",ATAKHAN:"Atakhan"};
+  const c=o.pres>=50?"good":(o.pres>=25?"warn":"bad");
+  return `<tr><td><b>${nombres[o.type]||o.type}</b></td><td>${o.n}</td>
+    <td class="${c}"><b>${o.pres}%</b></td>
+    <td><div class="track" style="margin:0"><div class="fill ${o.pres>=50?'ok':(o.pres>=25?'mid':'low')}" style="width:${o.pres}%"></div></div></td></tr>`;
+}).join("");
+
+// --- tendencia
+(function(){
+  const W=920,H=250,pad=44;
+  const line=(arr,cls)=>{
+    const st=(W-pad-16)/Math.max(arr.length-1,1);
+    return `<polyline class="${cls}" points="${arr.map((v,i)=>`${pad+i*st},${H-30-(v/100)*(H-58)}`).join(" ")}"/>`;
+  };
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="chart">`;
+  for(let g=0;g<=100;g+=25){
+    const y=H-30-(g/100)*(H-58);
+    s+=`<line class="grd" x1="${pad}" y1="${y}" x2="${W-16}" y2="${y}"/><text class="axs" x="10" y="${y+4}">${g}</text>`;
+  }
+  s+=line(D.serie_wr,"l1")+line(D.serie_idx,"l2")+`</svg>`;
+  $("trend").innerHTML=s;
+})();
+
+$("comp").innerHTML = D.comparativa.map(c=>
+  `<tr><td>${c.label}</td><td>${c.hist}</td><td><b>${c.last}</b></td>
+   <td class="${c.better?'good':'bad'}">${c.better?"mejorando":"empeorando"}</td></tr>`).join("");
+
+// --- trayectoria de merito Nautilus (automatica, sin inputs manuales)
+(function(){
+  const m = D.merito;
+  $("mscore").textContent = m.score_hoy >= 1000 ? m.score_hoy.toExponential(1) : m.score_hoy.toFixed(2);
+  $("mtier").textContent = `Tier ${m.tier_hoy} · ${m.wr_hoy}% WR · KDA ${m.kda_hoy} · ${m.juegos} partidas de Nautilus`;
+  const tend = m.tendencia_pct;
+  $("mtrend").textContent = (tend>0?"+":"") + tend + "%";
+  $("mtrend").className = "big " + (tend>0?"good":(tend<0?"bad":""));
+  $("mwr").textContent = `+${m.wr_para_duplicar} pts de winrate`;
+  $("mkda").innerHTML = m.kda_para_duplicar ? `o KDA de ${m.kda_para_duplicar} (referencia fija de la fórmula, no cambia con tus partidas)` : "";
+
+  if(m.serie && m.serie.length>=2){
+    const W=920,H=200,pad=44, s=m.serie, mn=Math.min(...s), mx=Math.max(...s);
+    const rango = (mx-mn)||1;
+    const st=(W-pad-16)/(s.length-1);
+    const pts = s.map((v,i)=>`${pad+i*st},${H-30-((v-mn)/rango)*(H-58)}`).join(" ");
+    $("mchart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" class="chart">
+      <polyline class="l1" points="${pts}"/>
+      <text class="axs" x="10" y="20">score de mérito, recalculado cada 5 partidas de Nautilus</text>
+      </svg>`;
+  } else {
+    $("mchart").innerHTML = `<div class="note">Necesitas al menos 20 partidas de Nautilus para
+      trazar una tendencia fiable. Ya tienes ${m.juegos} — sigue jugando y esta gráfica aparece sola.</div>`;
+  }
+  $("mverdict").innerHTML = tend > 3
+    ? `Tu score de mérito está subiendo: en tu ventana más reciente rindes mejor que hace un
+       tramo de partidas. Sigue así — esto es lo que te acerca al puesto 1 de verdad.`
+    : (tend < -3
+      ? `Tu score de mérito está bajando frente a un tramo anterior. No entres en pánico por una
+         racha corta, pero sí revisa la sección 7 para ver qué palanca se te está escapando.`
+      : `Tu score está estable. Para moverlo de verdad necesitas más volumen con Nautilus o una
+         racha de winrate sostenida, no partidas sueltas.`);
+})();
+
+// --- historial reciente estilo op.gg
+$("recent").innerHTML = (D.recent_games||[]).map(g=>{
+  const resCls = g.win ? "good" : "bad";
+  const resTxt = g.win ? "Victoria" : "Derrota";
+  const scoreCls = g.score10>=8?"good":(g.score10>=5?"warn":"bad");
+  const rival = g.riv_champion
+    ? `${g.riv_champion} · ${g.riv_kda||"—"} · visión ${g.riv_vision??"—"}`
+    : "—";
+  return `<tr>
+    <td>${g.date}</td>
+    <td><b>${g.champion}</b></td>
+    <td class="${resCls}">${resTxt}</td>
+    <td>${g.kda}</td>
+    <td>${g.vision??"—"}</td>
+    <td class="${scoreCls}"><b>${g.score10??"—"}</b>${g.mvp?' <span class="pill good">MVP</span>':""}</td>
+    <td class="sub">${rival}</td>
+  </tr>`;
+}).join("");
+
+// --- manual de juego (data-driven, se recalcula cada corrida)
+$("bwr2").textContent = D.base_wr + "%";
+
+function reglaCard(r, destacada){
+  const conf = r.n>=40 ? "Alta confianza" : "Confianza media";
+  const confCls = r.n>=40 ? "good" : "warn";
+  return `<div class="card" style="margin-bottom:10px;${destacada?"border-color:var(--good)":""}">
+    <div class="row"><b>${r.cond_txt || r.label}</b>
+      <span class="pill ${confCls}">${conf} · n=${r.n}</span></div>
+    <div class="row" style="margin-top:6px">
+      <div class="now good">${r.wr}%</div>
+      <div class="tgt">winrate (base ${D.base_wr}%) · intervalo 95%: ${r.lo}–${r.hi}%</div>
+    </div>
+    <div class="track"><div class="fill ok" style="width:${Math.min(r.wr,100)}%"></div></div>
+    ${r.why ? `<div class="why">${r.why}</div>` : ""}
+  </div>`;
+}
+
+if(D.reglas_simples && D.reglas_simples.length){
+  $("reglas_simples").innerHTML = D.reglas_simples.map((r,i)=>reglaCard(r, i===0)).join("");
+} else {
+  $("reglas_simples").innerHTML = `<div class="note">Todavía no hay suficientes partidas para
+    aislar una palanca individual con confianza. Sigue jugando y esta sección se llena sola.</div>`;
+}
+
+if(D.reglas_combo && D.reglas_combo.length){
+  $("reglas_combo").innerHTML = D.reglas_combo.map(r=>reglaCard(r,false)).join("");
+} else {
+  $("reglas_combo").innerHTML = `<div class="note">Ninguna combinación de dos palancas supera
+    todavía a cada una por separado con suficiente confianza. No es un error: significa que no
+    hay sinergia clara aún, no que no exista.</div>`;
+}
+
+if(D.fortalezas && D.fortalezas.length){
+  $("fortalezas").innerHTML = D.fortalezas.map(r=>
+    `<div class="card" style="margin-bottom:8px">
+      <div class="row"><span>${r.cond_txt}</span>
+      <span class="good"><b>${r.wr}%</b> <span class="pill">ya lo cumples</span></span></div>
+    </div>`).join("");
+} else {
+  $("fortalezas").innerHTML = `<div class="note">Ninguna de tus medias actuales cae todavía del
+    lado ganador de una regla con señal. Es información real, no un fallo del panel: apunta a que
+    la consistencia, no picos puntuales, es lo que te falta.</div>`;
+}
+
+if(D.sin_senal && D.sin_senal.length){
+  $("sin_senal_box").innerHTML = `<b>Sin señal suficiente todavía:</b> ${D.sin_senal.join(", ")}.
+    No invento un consejo con esto — o la muestra es chica o el efecto no se distingue del azar
+    en tus datos actuales. Vuelve a correr el panel cuando tengas más partidas.`;
+} else {
+  $("sin_senal_box").innerHTML = `Todas las métricas medidas ya muestran señal estadística en
+    al menos un umbral. Buena señal de que la muestra ya es sólida.`;
+}
+</script></body></html>
