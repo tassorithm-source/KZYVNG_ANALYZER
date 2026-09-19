@@ -1,4 +1,4 @@
-# KZYVNG Analyzer — Panel de Ascenso
+# KZYVNG Analyzer — Experimental con ayuda de IA
 
 Sistema de análisis estadístico personal para League of Legends, enfocado en
 el rol de support de enganche (Nautilus, Rakan, Rell). Descarga el historial
@@ -8,6 +8,8 @@ juego reales de ruido estadístico.
 
 El resultado es un panel HTML autocontenido — sin backend, sin frameworks —
 que se regenera cada vez que corre el pipeline localmente.
+
+En evolución hacia un analizador universal de League of Legends, diseñado para adaptarse a cualquier jugador y analizar su rendimiento de forma personalizada.
 
 ## Qué hace exactamente
 
