@@ -1,4 +1,4 @@
-# KZYVNG Analyzer - AI Bot Lane Synergy Coach
+# KZYVNG Analyzer - AI Coach
 
 Panel de análisis estadístico y coaching de datos para League of Legends,
 construido sobre la Riot Games API. Descarga tu historial de partidas,
