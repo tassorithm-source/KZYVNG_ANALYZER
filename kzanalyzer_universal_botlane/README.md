@@ -1,5 +1,11 @@
 # KZAnalyzer Universal - AI Bot Lane Synergy Coach
 
+Panel de análisis estadístico y coaching de datos para League of Legends,
+construido sobre la Riot Games API. Descarga tu historial de partidas,
+reconstruye cada evento del timeline, y aplica minería de reglas
+estadísticas para separar patrones de juego reales de ruido — sin
+umbrales inventados, sin consejos genéricos de "juega más agresivo".
+
 ## Qué hace exactamente
 
 ### 1. Ingesta de datos (Riot API)
