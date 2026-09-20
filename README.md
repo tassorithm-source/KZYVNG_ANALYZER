@@ -135,19 +135,6 @@ Vuelve a correr los mismos seis comandos (o solo los últimos si no
 descargaste partidas nuevas) y el panel se regenera con tus datos
 actuales.
 
-## Compartir tu panel con otros
-
-`report_v3.html` es un archivo autocontenido, pero casi todo su contenido
-se llena con JavaScript al cargar — si lo mandas por WhatsApp/Telegram
-como **archivo**, el visor interno de esas apps no ejecuta scripts y se
-ve vacío. La solución es subirlo a un hosting estático y compartir el
-**link**, no el archivo:
-
-- **[GitHub Pages](https://pages.github.com)** — gratis, el link no
-  cambia entre actualizaciones (solo reemplazas el archivo).
-- **[tiiny.host](https://tiiny.host)** — arrastra y suelta, más rápido
-  para pruebas puntuales.
-
 ## Estructura del proyecto
 
 ```
