@@ -185,10 +185,6 @@ ve vacío. La solución es subirlo a un hosting estático y compartir el
   decir honestamente que todavía no hay señal suficiente — es preferible
   a inventar un consejo con una muestra de 3 partidas.
 
-## Créditos
-
-Construido y mantenido por **Kzyvng**. Si te sirve, dale una estrella al
-repo. Pull requests y forks son bienvenidos.
 
 Este proyecto no está afiliado a Riot Games. League of Legends es una
 marca registrada de Riot Games, Inc.
