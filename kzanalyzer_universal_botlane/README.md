@@ -1,20 +1,4 @@
-# KZYVNG Analyzer
-
-Panel de análisis estadístico y coaching de datos para League of Legends,
-construido sobre la Riot Games API. Descarga tu historial de partidas,
-reconstruye cada evento del timeline, y aplica minería de reglas
-estadísticas para separar patrones de juego reales de ruido — sin
-umbrales inventados, sin consejos genéricos de "juega más agresivo".
-
-Es un proyecto personal mío (**Kzyvng**, support de Nautilus/Rakan/Rell)
-que estoy abriendo para que cualquiera pueda correrlo con **su propia
-cuenta**. No necesitas tocar el código para usarlo — solo
-necesitas tu propia API key de Riot y tu Riot ID. Todo lo demás (tu
-campeón principal, tu servidor, tus métricas) se detecta o se configura
-solo.
-
-> Este repo no incluye datos de ninguna cuenta. Cada persona que lo corre
-> genera su propio panel, con sus propias partidas, en su propia máquina.
+# KZAnalyzer Universal - AI Bot Lane Synergy Coach
 
 ## Qué hace exactamente
 
